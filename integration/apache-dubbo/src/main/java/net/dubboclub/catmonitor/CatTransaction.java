@@ -1,12 +1,12 @@
 package net.dubboclub.catmonitor;
 
-import com.alibaba.dubbo.common.Constants;
-import com.alibaba.dubbo.common.URL;
-import com.alibaba.dubbo.common.extension.Activate;
-import com.alibaba.dubbo.remoting.RemotingException;
-import com.alibaba.dubbo.remoting.TimeoutException;
-import com.alibaba.dubbo.rpc.*;
-import com.alibaba.dubbo.rpc.support.RpcUtils;
+import org.apache.dubbo.common.URL;
+import org.apache.dubbo.common.constants.CommonConstants;
+import org.apache.dubbo.common.extension.Activate;
+import org.apache.dubbo.remoting.RemotingException;
+import org.apache.dubbo.remoting.TimeoutException;
+import org.apache.dubbo.rpc.*;
+import org.apache.dubbo.rpc.support.RpcUtils;
 import com.dianping.cat.Cat;
 import com.dianping.cat.log.CatLogger;
 import com.dianping.cat.message.Event;
@@ -21,7 +21,7 @@ import java.util.Map;
 /**
  * Created by bieber on 2015/11/4.
  */
-@Activate(group = {Constants.PROVIDER, Constants.CONSUMER},order = -9000)
+@Activate(group = {CommonConstants.PROVIDER, CommonConstants.CONSUMER},order = -9000)
 public class CatTransaction implements Filter {
 
     private final static String DUBBO_BIZ_ERROR="DUBBO_BIZ_ERROR";
@@ -40,10 +40,10 @@ public class CatTransaction implements Filter {
             return result;
         }
         URL url = invoker.getUrl();
-        String sideKey = url.getParameter(Constants.SIDE_KEY);
+        String sideKey = url.getParameter(CommonConstants.SIDE_KEY);
         String loggerName = invoker.getInterface().getSimpleName()+"."+invocation.getMethodName();
         String type = CatConstants.CROSS_CONSUMER;
-        if(Constants.PROVIDER_SIDE.equals(sideKey)){
+        if(CommonConstants.PROVIDER_SIDE.equals(sideKey)){
             type= CatConstants.CROSS_SERVER;
         }
 
@@ -53,7 +53,7 @@ public class CatTransaction implements Filter {
         try{
             transaction = Cat.newTransaction(type, loggerName);
             Cat.Context context = getContext();
-            if(Constants.CONSUMER_SIDE.equals(sideKey)){
+            if(CommonConstants.CONSUMER_SIDE.equals(sideKey)){
                 createConsumerCross(url,transaction);
                 Cat.logRemoteCallClient(context);
             }else{
@@ -156,7 +156,7 @@ public class CatTransaction implements Filter {
     private String getProviderAppName(URL url){
         String appName = url.getParameter(CatConstants.PROVIDER_APPLICATION_NAME);
         if(StringUtils.isEmpty(appName)){
-            String interfaceName  = url.getParameter(Constants.INTERFACE_KEY);
+            String interfaceName  = url.getParameter(CommonConstants.INTERFACE_KEY);
             appName = interfaceName.substring(0,interfaceName.lastIndexOf('.'));
         }
         return appName;
@@ -210,7 +210,7 @@ public class CatTransaction implements Filter {
     }
 
     private void createProviderCross(URL url,Transaction transaction){
-        String consumerAppName = RpcContext.getContext().getAttachment(Constants.APPLICATION_KEY);
+        String consumerAppName = RpcContext.getContext().getAttachment(CommonConstants.APPLICATION_KEY);
         if(StringUtils.isEmpty(consumerAppName)){
             consumerAppName= RpcContext.getContext().getRemoteHost()+":"+ RpcContext.getContext().getRemotePort();
         }
